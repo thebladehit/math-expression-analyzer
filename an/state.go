@@ -26,7 +26,7 @@ var StateTable = map[StateType]map[TokenType]Transition{
 		TokenFN:    Transition{Next: FNState},
 		TokenOB:    Transition{Next: OBState},
 		TokenUM:    Transition{Next: UMState},
-		TokenEND:   Transition{Next: ENDState},
+		TokenEND:   Transition{Next: ENDState, Err: "Пустий вираз"},
 		TokenOP:    Transition{Next: OPState, Err: "Вираз не може починатися з операції '{t}'"},
 		TokenCB:    Transition{Next: CBState, Err: "Вираз не може починатися із закриваючої дужки '{t}'"},
 	},
