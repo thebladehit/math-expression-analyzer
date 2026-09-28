@@ -10,7 +10,10 @@ import (
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
-	analyzer := an.NewAnalyzer()
+	lexer := an.NewLexer()
+	startState := an.StState
+	parser := an.NewParser(startState)
+	analyzer := an.NewAnalyzer(lexer, parser)
 
 	fmt.Print("Введіть вираз: ")
 	input, err := reader.ReadString('\n')
@@ -21,10 +24,9 @@ func main() {
 
 	input = strings.Trim(input, "\n")
 
-	analyzer.Start(input)
-	//res, errS := analyzer.Start(input)
-	//if errS != nil {
-	//	fmt.Println(errS)
-	//}
-	//fmt.Println(res)
+	tokens, errs := analyzer.Start(input)
+	fmt.Println(tokens)
+	if errs != nil {
+		fmt.Println(errs)
+	}
 }
