@@ -1,8 +1,6 @@
 package an
 
 import (
-	"fmt"
-	"slices"
 	"strings"
 )
 
@@ -37,7 +35,6 @@ func (p *parser) Clear() {
 func (p *parser) Parse(tokens []Token) []Error {
 	for _, token := range tokens {
 		p.checkBrackets(token)
-		p.checkFun(token)
 
 		tr := StateTable[p.state][token.Type]
 		if tr.Err != "" {
@@ -65,13 +62,5 @@ func (p *parser) checkBrackets(token Token) {
 			return
 		}
 		p.sData.brackets = p.sData.brackets[:len(p.sData.brackets)-1]
-	}
-}
-
-var ALLOWED_FN = []string{"abs", "cos", "sin"}
-
-func (p *parser) checkFun(token Token) {
-	if token.Type == TokenFN && !slices.Contains(ALLOWED_FN, token.Text) {
-		p.errors = append(p.errors, Error{Pos: token.Pos, Msg: fmt.Sprintf("Невідома функція: '%s'", token.Text)})
 	}
 }

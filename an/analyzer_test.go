@@ -28,6 +28,9 @@ func TestValidExpressions(t *testing.T) {
 		"-(a+-b)",
 		"sin(x)*2",
 		"sin(x)*(2.5-y)/abs(-z)",
+		"x1+my_var*2",
+		"total/count",
+		"sin(angle)*radius",
 	}
 	for _, input := range cases {
 		t.Run(input, func(t *testing.T) {
@@ -70,7 +73,8 @@ func TestErrorPositions(t *testing.T) {
 
 		// написання
 		{"зайва крапка", "1.2.3", []int{3}},
-		{"невідома функція", "foo(x)", []int{0}},
+		{"дужка після змінної (невідома функція)", "foo(x)", []int{3}},
+		{"ім'я починається з цифри", "2abc", []int{1}},
 		{"недопустимий символ", "a@b", []int{1, 2}},
 	}
 	for _, tc := range cases {
@@ -92,6 +96,8 @@ func TestTokenTypes(t *testing.T) {
 		{"-(a)-2", []TokenType{TokenUM, TokenOB, TokenVAR, TokenCB, TokenOP, TokenCONST, TokenEND}},
 		{"a*-b", []TokenType{TokenVAR, TokenOP, TokenUM, TokenVAR, TokenEND}},
 		{"3.14 + y", []TokenType{TokenCONST, TokenOP, TokenVAR, TokenEND}},
+		{"my_var2*sinx", []TokenType{TokenVAR, TokenOP, TokenVAR, TokenEND}},
+		{"cos(foo)", []TokenType{TokenFN, TokenOB, TokenVAR, TokenCB, TokenEND}},
 		{"", []TokenType{TokenEND}},
 	}
 	for _, tc := range cases {

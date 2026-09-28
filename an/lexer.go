@@ -2,6 +2,7 @@ package an
 
 import (
 	"fmt"
+	"slices"
 	"unicode"
 )
 
@@ -77,21 +78,23 @@ func (l *lexer) parseDigits(idx int, runes []rune) (Token, int) {
 	return NewToken(TokenCONST, string(digits), idx), i - 1
 }
 
+var ALLOWED_FN = []string{"abs", "cos", "sin"}
+
 func (l *lexer) parseLetters(idx int, runes []rune) (Token, int) {
 	letters := make([]rune, 0)
 	i := idx
 	for ; i < len(runes); i++ {
 		r := runes[i]
-		if !unicode.IsLetter(r) {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '_' {
 			break
 		}
 		letters = append(letters, r)
 	}
 	str := string(letters)
-	if len(letters) == 1 {
-		return NewToken(TokenVAR, str, idx), i - 1
+	if slices.Contains(ALLOWED_FN, str) {
+		return NewToken(TokenFN, str, idx), i - 1
 	}
-	return NewToken(TokenFN, str, idx), i - 1
+	return NewToken(TokenVAR, str, idx), i - 1
 }
 
 func (l *lexer) parseMinus(idx int, runes []rune) (Token, int) {
