@@ -25,8 +25,5 @@ func main() {
 	input = strings.Trim(input, "\n")
 
 	tokens, errs := analyzer.Start(input)
-	fmt.Println(tokens)
-	if errs != nil {
-		fmt.Println(errs)
-	}
+	PrintResult(input, tokens, errs)
 }
