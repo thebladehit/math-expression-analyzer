@@ -29,6 +29,17 @@ func NewNode(token an.Token) *Node {
 	}
 }
 
+func (n *Node) Height() int {
+	if n == nil {
+		return -1
+	}
+
+	lH := n.Left.Height() + 1
+	rH := n.Right.Height() + 1
+
+	return max(lH, rH)
+}
+
 func nodeType(token an.Token) NodeType {
 	switch token.Type {
 	case an.TokenVAR:
