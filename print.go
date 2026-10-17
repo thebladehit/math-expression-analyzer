@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	an "pzcs-lab1/an"
+	"pzcs-lab1/tree"
 )
 
 const (
@@ -31,6 +32,25 @@ func paint(s, color string) string {
 		return s
 	}
 	return color + s + colorReset
+}
+
+func PrintOptimizations(simplified fmt.Stringer, optimizations []string) {
+	if len(optimizations) == 0 {
+		return
+	}
+	fmt.Println()
+	fmt.Println(paint("Оптимізації:", colorBold))
+	for i, o := range optimizations {
+		fmt.Printf("  %d. %s\n", i+1, o)
+	}
+	fmt.Println(paint("Після оптимізації: ", colorDim) + simplified.String())
+}
+
+func PrintTree(title string, root *tree.Node) {
+	fmt.Println()
+	fmt.Println(paint(title+":", colorBold))
+	fmt.Print(root.Draw())
+	fmt.Println(paint(fmt.Sprintf("ярусів: %d", root.Height()), colorDim))
 }
 
 func PrintTokens(tokens []an.Token) {
@@ -108,4 +128,16 @@ func tokenLen(tokens []an.Token, pos int) int {
 		}
 	}
 	return 1
+}
+
+func TokensToString(tokens []an.Token) string {
+	parts := make([]string, 0, len(tokens))
+	for _, t := range tokens {
+		if t.Type == an.TokenUM {
+			parts = append(parts, "-u")
+			continue
+		}
+		parts = append(parts, t.Text)
+	}
+	return strings.Join(parts, " ")
 }
