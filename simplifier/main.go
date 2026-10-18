@@ -73,7 +73,7 @@ func (s *simplifier) simplifyOp(n *tree.Node) *tree.Node {
 }
 
 func (s *simplifier) replace(old, new *tree.Node, reason string) *tree.Node {
-	s.log = append(s.log, fmt.Sprintf("%s: %s → %s", reason, old, new))
+	s.log = append(s.log, fmt.Sprintf("%s (поз. %d)", reason, old.Token.Pos+1))
 	return new
 }
 

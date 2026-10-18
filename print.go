@@ -34,7 +34,7 @@ func paint(s, color string) string {
 	return color + s + colorReset
 }
 
-func PrintOptimizations(simplified fmt.Stringer, optimizations []string) {
+func PrintOptimizations(optimizations []string) {
 	if len(optimizations) == 0 {
 		return
 	}
@@ -43,7 +43,6 @@ func PrintOptimizations(simplified fmt.Stringer, optimizations []string) {
 	for i, o := range optimizations {
 		fmt.Printf("  %d. %s\n", i+1, o)
 	}
-	fmt.Println(paint("Після оптимізації: ", colorDim) + simplified.String())
 }
 
 func PrintTree(title string, root *tree.Node) {
