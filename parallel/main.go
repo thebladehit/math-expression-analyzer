@@ -2,6 +2,7 @@ package parallel
 
 import (
 	"cmp"
+	"pzcs-lab1/group"
 	"slices"
 
 	"pzcs-lab1/an"
@@ -18,28 +19,13 @@ func NewParallelizer() Parallelizer {
 	return &parallelizer{}
 }
 
-type item struct {
-	node    *tree.Node
-	inverse bool
-}
-
-type group struct {
-	direct  string
-	inverse string
-}
-
-var (
-	additive       = group{"+", "-"}
-	multiplicative = group{"*", "/"}
-)
-
 func (p *parallelizer) Parallelize(n *tree.Node) *tree.Node {
 	switch n.Type {
 	case tree.NodeOP:
-		g := groupOf(n)
-		items := collect(n, g, false)
+		g := group.Of(n)
+		items := group.Collect(n, g, false)
 		for i := range items {
-			items[i].node = p.Parallelize(items[i].node)
+			items[i].Node = p.Parallelize(items[i].Node)
 		}
 		return combine(items, g)
 	case tree.NodeFN, tree.NodeUM:
@@ -48,53 +34,32 @@ func (p *parallelizer) Parallelize(n *tree.Node) *tree.Node {
 	return n
 }
 
-func groupOf(n *tree.Node) group {
-	if n.Token.Text == "*" || n.Token.Text == "/" {
-		return multiplicative
-	}
-	return additive
-}
-
-func collect(n *tree.Node, g group, inverse bool) []item {
-	if n.Type == tree.NodeOP && (n.Token.Text == g.direct || n.Token.Text == g.inverse) {
-		rightInv := inverse
-		if n.Token.Text == g.inverse {
-			rightInv = !rightInv
-		}
-		return append(collect(n.Left, g, inverse), collect(n.Right, g, rightInv)...)
-	}
-	if n.Type == tree.NodeUM && g == additive {
-		return collect(n.Left, g, !inverse)
-	}
-	return []item{{node: n, inverse: inverse}}
-}
-
-func combine(items []item, g group) *tree.Node {
+func combine(items []group.Item, g group.Group) *tree.Node {
 	for len(items) > 1 {
-		slices.SortStableFunc(items, func(a, b item) int {
-			return cmp.Compare(a.node.Height(), b.node.Height())
+		slices.SortStableFunc(items, func(a, b group.Item) int {
+			return cmp.Compare(a.Node.Height(), b.Node.Height())
 		})
 		items = append(items[2:], join(items[0], items[1], g))
 	}
-	if items[0].inverse {
-		return negate(items[0].node, g)
+	if items[0].Inverse {
+		return negate(items[0].Node, g)
 	}
-	return items[0].node
+	return items[0].Node
 }
 
-func join(a, b item, g group) item {
+func join(a, b group.Item, g group.Group) group.Item {
 	switch {
-	case a.inverse == b.inverse:
-		return item{newOp(g.direct, a.node, b.node), a.inverse}
-	case b.inverse:
-		return item{newOp(g.inverse, a.node, b.node), false}
+	case a.Inverse == b.Inverse:
+		return group.Item{Node: newOp(g.Direct, a.Node, b.Node), Inverse: a.Inverse}
+	case b.Inverse:
+		return group.Item{Node: newOp(g.Inverse, a.Node, b.Node)}
 	default:
-		return item{newOp(g.inverse, b.node, a.node), false}
+		return group.Item{Node: newOp(g.Inverse, b.Node, a.Node)}
 	}
 }
 
-func negate(n *tree.Node, g group) *tree.Node {
-	if g == additive {
+func negate(n *tree.Node, g group.Group) *tree.Node {
+	if g == group.Additive {
 		um := tree.NewNode(an.NewToken(an.TokenUM, "-", n.Token.Pos))
 		um.Left = n
 		return um
