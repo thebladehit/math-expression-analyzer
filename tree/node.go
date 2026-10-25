@@ -40,6 +40,18 @@ func (n *Node) Height() int {
 	return max(lH, rH)
 }
 
+func (n *Node) Clone() *Node {
+	if n == nil {
+		return nil
+	}
+	return &Node{
+		Type:  n.Type,
+		Token: n.Token,
+		Left:  n.Left.Clone(),
+		Right: n.Right.Clone(),
+	}
+}
+
 func nodeType(token an.Token) NodeType {
 	switch token.Type {
 	case an.TokenVAR:
