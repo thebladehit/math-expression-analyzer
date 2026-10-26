@@ -2,10 +2,9 @@ package parallel
 
 import (
 	"cmp"
-	"pzcs-lab1/group"
 	"slices"
 
-	"pzcs-lab1/an"
+	"pzcs-lab1/group"
 	"pzcs-lab1/tree"
 )
 
@@ -42,7 +41,7 @@ func combine(items []group.Item, g group.Group) *tree.Node {
 		items = append(items[2:], join(items[0], items[1], g))
 	}
 	if items[0].Inverse {
-		return negate(items[0].Node, g)
+		return group.Negate(items[0].Node, g)
 	}
 	return items[0].Node
 }
@@ -50,27 +49,10 @@ func combine(items []group.Item, g group.Group) *tree.Node {
 func join(a, b group.Item, g group.Group) group.Item {
 	switch {
 	case a.Inverse == b.Inverse:
-		return group.Item{Node: newOp(g.Direct, a.Node, b.Node), Inverse: a.Inverse}
+		return group.Item{Node: tree.NewOp(g.Direct, a.Node, b.Node), Inverse: a.Inverse}
 	case b.Inverse:
-		return group.Item{Node: newOp(g.Inverse, a.Node, b.Node)}
+		return group.Item{Node: tree.NewOp(g.Inverse, a.Node, b.Node)}
 	default:
-		return group.Item{Node: newOp(g.Inverse, b.Node, a.Node)}
+		return group.Item{Node: tree.NewOp(g.Inverse, b.Node, a.Node)}
 	}
-}
-
-func negate(n *tree.Node, g group.Group) *tree.Node {
-	if g == group.Additive {
-		um := tree.NewNode(an.NewToken(an.TokenUM, "-", n.Token.Pos))
-		um.Left = n
-		return um
-	}
-	one := tree.NewNode(an.NewToken(an.TokenCONST, "1", n.Token.Pos))
-	return newOp("/", one, n)
-}
-
-func newOp(op string, left, right *tree.Node) *tree.Node {
-	node := tree.NewNode(an.NewToken(an.TokenOP, op, left.Token.Pos))
-	node.Left = left
-	node.Right = right
-	return node
 }

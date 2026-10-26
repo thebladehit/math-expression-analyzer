@@ -29,6 +29,13 @@ func NewNode(token an.Token) *Node {
 	}
 }
 
+func NewOp(op string, left, right *Node) *Node {
+	node := NewNode(an.NewToken(an.TokenOP, op, left.Token.Pos))
+	node.Left = left
+	node.Right = right
+	return node
+}
+
 func (n *Node) Height() int {
 	if n == nil {
 		return -1

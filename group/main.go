@@ -1,10 +1,21 @@
 package group
 
-import "pzcs-lab1/tree"
+import (
+	"pzcs-lab1/an"
+	"pzcs-lab1/tree"
+)
 
 type Item struct {
 	Node    *tree.Node
 	Inverse bool
+}
+
+func (it Item) String() string {
+	sign := "+"
+	if it.Inverse {
+		sign = "~"
+	}
+	return sign + tree.ToInfix(it.Node)
 }
 
 type Group struct {
@@ -22,6 +33,16 @@ func Of(n *tree.Node) Group {
 		return Multiplicative
 	}
 	return Additive
+}
+
+func Negate(n *tree.Node, g Group) *tree.Node {
+	if g == Additive {
+		um := tree.NewNode(an.NewToken(an.TokenUM, "-", n.Token.Pos))
+		um.Left = n
+		return um
+	}
+	one := tree.NewNode(an.NewToken(an.TokenCONST, "1", n.Token.Pos))
+	return tree.NewOp("/", one, n)
 }
 
 func Collect(n *tree.Node, g Group, inverse bool) []Item {
