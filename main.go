@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	an "pzcs-lab1/an"
-	pr "pzcs-lab1/parallel"
+	cm "pzcs-lab1/commute"
 	pf "pzcs-lab1/postfix"
 	sm "pzcs-lab1/simplifier"
 	tr "pzcs-lab1/tree"
 	"strings"
 )
+
+const formsLimit = 50
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
@@ -21,7 +23,8 @@ func main() {
 	postfixer := pf.NewPostfix()
 	treeBuilder := tr.NewTreeBuilder()
 	simplifier := sm.NewSimplifier()
-	parallelizer := pr.NewParallelizer()
+	//parallelizer := pr.NewParallelizer()
+	commuter := cm.NewCommuter()
 
 	fmt.Print("Введіть вираз: ")
 	input, err := reader.ReadString('\n')
@@ -48,6 +51,8 @@ func main() {
 	PrintOptimizations(optimizations)
 	PrintTree("Дерево виразу після оптимізацій", tree)
 
-	tree = parallelizer.Parallelize(tree)
-	PrintTree("Дерево паралельної форми", tree)
+	PrintForms("Форми за законом комутативності", commuter.Forms(tree, formsLimit), formsLimit)
+
+	//tree = parallelizer.Parallelize(tree)
+	//PrintTree("Дерево паралельної форми", tree)
 }

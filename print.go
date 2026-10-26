@@ -45,6 +45,17 @@ func PrintOptimizations(optimizations []string) {
 	}
 }
 
+func PrintForms(title string, forms []*tree.Node, limit int) {
+	fmt.Println()
+	fmt.Println(paint(fmt.Sprintf("%s (%d):", title, len(forms)), colorBold))
+	for i, f := range forms {
+		fmt.Printf("  %2d. %s\n", i+1, tree.ToInfix(f))
+	}
+	if len(forms) == limit {
+		fmt.Println(paint(fmt.Sprintf("  … показано перші %d", limit), colorDim))
+	}
+}
+
 func PrintTree(title string, root *tree.Node) {
 	fmt.Println()
 	fmt.Println(paint(title+":", colorBold))
