@@ -46,6 +46,10 @@ func Negate(n *tree.Node, g Group) *tree.Node {
 }
 
 func Collect(n *tree.Node, g Group, inverse bool) []Item {
+	if n.Type == tree.NodeOP && n.Token.Text == "/" && g == Multiplicative &&
+		n.Left.Type == tree.NodeCONST && n.Left.Token.Text == "1" {
+		return Collect(n.Right, g, !inverse)
+	}
 	if n.Type == tree.NodeOP && (n.Token.Text == g.Direct || n.Token.Text == g.Inverse) {
 		rightInv := inverse
 		if n.Token.Text == g.Inverse {
