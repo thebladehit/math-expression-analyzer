@@ -18,19 +18,7 @@ func NewCommuter() Commuter {
 }
 
 func (c *commuter) Forms(n *tree.Node, limit int) []*tree.Node {
-	return unique(commute(n, limit))
-}
-
-func unique(forms []*tree.Node) []*tree.Node {
-	seen := map[string]bool{}
-	var result []*tree.Node
-	for _, f := range forms {
-		if key := tree.ToInfix(f); !seen[key] {
-			seen[key] = true
-			result = append(result, f)
-		}
-	}
-	return result
+	return tree.Unique(commute(n, limit))
 }
 
 func commute(n *tree.Node, limit int) []*tree.Node {
