@@ -10,6 +10,8 @@ const (
 	OpMul Op = "*"
 	OpDiv Op = "/"
 	OpNeg Op = "neg"
+	OpFn  Op = "fn"
+	OpMem Op = "mem"
 )
 
 func opName(n *tree.Node) Op {
