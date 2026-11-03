@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	an "pzcs-lab1/an"
+	df "pzcs-lab1/dataflow"
 	"pzcs-lab1/tree"
 )
 
@@ -150,4 +151,87 @@ func TokensToString(tokens []an.Token) string {
 		parts = append(parts, t.Text)
 	}
 	return strings.Join(parts, " ")
+}
+
+func PrintBanks(bankOf map[string]int, banks int) {
+	vars := make([][]string, banks)
+	for v, b := range bankOf {
+		vars[b] = append(vars[b], v)
+	}
+	fmt.Println("\nРозкладка змінних по банках:")
+	for b, vs := range vars {
+		slices.Sort(vs)
+		fmt.Printf("  B%d: %s\n", b+1, strings.Join(vs, ", "))
+	}
+}
+
+func PrintGantt(res df.Result, processors, banks int) {
+	fmt.Println("\nДіаграма Ганта:")
+	if res.Time == 0 {
+		fmt.Println("  вираз не містить операцій")
+		return
+	}
+
+	cell := 3
+	for _, s := range res.Slots {
+		cell = max(cell, len(s.Label)+2)
+	}
+
+	var units []string
+	for p := range processors {
+		units = append(units, fmt.Sprintf("P%d", p+1))
+	}
+	for b := range banks {
+		units = append(units, fmt.Sprintf("B%d", b+1))
+	}
+
+	fmt.Print("    ")
+	for t := range res.Time {
+		fmt.Printf("%-*d", cell, t)
+	}
+	fmt.Println()
+
+	for _, u := range units {
+		var slots []df.Slot
+		for _, s := range res.Slots {
+			if s.Unit == u {
+				slots = append(slots, s)
+			}
+		}
+		slices.SortFunc(slots, func(a, b df.Slot) int { return a.Start - b.Start })
+
+		color := colorCyan
+		if u[0] == 'B' {
+			color = colorGreen
+		}
+
+		var line strings.Builder
+		t := 0
+		for _, s := range slots {
+			for ; t < s.Start; t++ {
+				line.WriteString(paint("·"+strings.Repeat(" ", cell-1), colorDim))
+			}
+			width := (s.End-s.Start)*cell - 2
+			line.WriteString(paint("["+s.Label+strings.Repeat(" ", width-len(s.Label))+"]", color))
+			t = s.End
+		}
+		for ; t < res.Time; t++ {
+			line.WriteString(paint("·"+strings.Repeat(" ", cell-1), colorDim))
+		}
+		fmt.Printf("%-4s%s\n", u, line.String())
+	}
+	fmt.Println("Tp =", res.Time)
+}
+
+func PrintMetrics(m df.Metrics) {
+	if m.Tp == 0 {
+		return
+	}
+	fmt.Println("\nМетрики:")
+	fmt.Printf("  Час послідовного виконання T1:          %d\n", m.T1)
+	fmt.Printf("  Час паралельного виконання Tp:          %d\n", m.Tp)
+	fmt.Printf("  Коефіцієнт прискорення K = T1/Tp:       %.2f\n", m.Speedup)
+	fmt.Printf("  Задіяно процесорів:                     %d з %d\n", m.Used, m.Total)
+	fmt.Printf("  Ефективність щодо задіяних K/%d:         %.2f\n", m.Used, m.EffUsed)
+	fmt.Printf("  Ефективність щодо всіх K/%d:             %.2f\n", m.Total, m.EffTotal)
 }
