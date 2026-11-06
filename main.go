@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"os"
 	an "pzcs-lab1/an"
-	as "pzcs-lab1/associate"
-	cm "pzcs-lab1/commute"
+	df "pzcs-lab1/dataflow"
 	pr "pzcs-lab1/parallel"
 	pf "pzcs-lab1/postfix"
 	sm "pzcs-lab1/simplifier"
@@ -15,6 +14,20 @@ import (
 )
 
 const formsLimit = 5000
+
+var cfg = df.Config{
+	Processors: 4,
+	Banks:      2,
+	Times: map[df.Op]int{
+		df.OpAdd: 1,
+		df.OpSub: 1,
+		df.OpMul: 2,
+		df.OpDiv: 4,
+		df.OpNeg: 1,
+		df.OpFn:  4,
+		df.OpMem: 1,
+	},
+}
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
@@ -26,8 +39,8 @@ func main() {
 	treeBuilder := tr.NewTreeBuilder()
 	simplifier := sm.NewSimplifier()
 	parallelizer := pr.NewParallelizer()
-	commuter := cm.NewCommuter()
-	associator := as.NewAssociator()
+	//commuter := cm.NewCommuter()
+	//associator := as.NewAssociator()
 
 	fmt.Print("Введіть вираз: ")
 	input, err := reader.ReadString('\n')
@@ -54,16 +67,32 @@ func main() {
 	PrintOptimizations(optimizations)
 	PrintTree("Дерево виразу після оптимізацій", tree)
 
-	PrintForms("Форми за законом комутативності", commuter.Forms(tree, formsLimit), formsLimit)
-	PrintForms("Форми за законом асоціативності", associator.Forms(tree, formsLimit), formsLimit)
+	//PrintForms("Форми за законом комутативності", commuter.Forms(tree, formsLimit), formsLimit)
+	//PrintForms("Форми за законом асоціативності", associator.Forms(tree, formsLimit), formsLimit)
 
-	var both []*tr.Node
-	for _, f := range commuter.Forms(tree, formsLimit) {
-		both = append(both, associator.Forms(f, formsLimit)...)
-	}
-	both = tr.Unique(both)
-	PrintForms("Форми за обома законами", both[:min(len(both), formsLimit)], formsLimit)
+	//var both []*tr.Node
+	//for _, f := range commuter.Forms(tree, formsLimit) {
+	//	both = append(both, associator.Forms(f, formsLimit)...)
+	//}
+	//both = tr.Unique(both)
+	//PrintForms("Форми за обома законами", both[:min(len(both), formsLimit)], formsLimit)
 
 	tree = parallelizer.Parallelize(tree)
 	PrintTree("Дерево паралельної форми", tree)
+
+	tasks := df.BuildGraph(tree)
+	fmt.Println("\nГраф задачі:")
+	if len(tasks) == 0 {
+		fmt.Println("  вираз не містить операцій")
+	}
+	for _, t := range tasks {
+		fmt.Println(" ", t)
+	}
+
+	bankOf := df.Distribute(tasks, cfg.Banks)
+	PrintBanks(bankOf, cfg.Banks)
+
+	res := df.Simulate(tasks, bankOf, cfg)
+	PrintGantt(res, cfg.Processors, cfg.Banks)
+	PrintMetrics(df.Measure(res, cfg))
 }
