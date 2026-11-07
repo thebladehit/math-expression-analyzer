@@ -1,7 +1,5 @@
 package dataflow
 
-import "strings"
-
 type Metrics struct {
 	T1       int
 	Tp       int
@@ -18,10 +16,10 @@ func Measure(res Result, cfg Config) Metrics {
 		return m
 	}
 
-	used := map[string]bool{}
+	used := map[Unit]bool{}
 	for _, s := range res.Slots {
 		m.T1 += s.End - s.Start
-		if strings.HasPrefix(s.Unit, "P") {
+		if s.Unit.Kind == Proc {
 			used[s.Unit] = true
 		}
 	}

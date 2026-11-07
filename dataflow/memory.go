@@ -1,9 +1,6 @@
 package dataflow
 
-import (
-	"fmt"
-	"slices"
-)
+import "slices"
 
 func Distribute(tasks []Task, banks int) map[string]int {
 	bankOf := map[string]int{}
@@ -39,7 +36,7 @@ func (m *banks) write(at int) Slot {
 
 func (m *banks) use(b, start int, label string) Slot {
 	m.free[b] = start + m.time
-	return Slot{fmt.Sprintf("B%d", b+1), start, m.free[b], label}
+	return Slot{Unit{Bank, b}, start, m.free[b], label}
 }
 
 func unique(vs []string) []string {

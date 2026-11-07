@@ -18,8 +18,24 @@ func (c Config) Duration(op Op) int {
 	return c.Times[OpFn]
 }
 
+type UnitKind string
+
+const (
+	Proc UnitKind = "P"
+	Bank UnitKind = "B"
+)
+
+type Unit struct {
+	Kind UnitKind
+	N    int
+}
+
+func (u Unit) String() string {
+	return fmt.Sprintf("%s%d", u.Kind, u.N+1)
+}
+
 type Slot struct {
-	Unit  string
+	Unit  Unit
 	Start int
 	End   int
 	Label string
@@ -51,7 +67,7 @@ func Simulate(tasks []Task, bankOf map[string]int, cfg Config) Result {
 	for _, i := range order {
 		ready := 0
 		for _, d := range tasks[i].Deps {
-			ready = max(ready, end[d-1])
+			ready = max(ready, end[d])
 		}
 
 		for _, v := range unique(tasks[i].Reads) {
@@ -64,7 +80,7 @@ func Simulate(tasks []Task, bankOf map[string]int, cfg Config) Result {
 		start := max(ready, procFree[p])
 		end[i] = start + cfg.Duration(tasks[i].Op)
 		procFree[p] = end[i]
-		res.Slots = append(res.Slots, Slot{fmt.Sprintf("P%d", p+1), start, end[i], fmt.Sprintf("op%d", tasks[i].ID)})
+		res.Slots = append(res.Slots, Slot{Unit{Proc, p}, start, end[i], tasks[i].Name()})
 	}
 
 	s := mem.write(end[n-1])
@@ -78,7 +94,7 @@ func priorities(tasks []Task, cfg Config) []int {
 	for i := len(tasks) - 1; i >= 0; i-- {
 		prio[i] += cfg.Duration(tasks[i].Op)
 		for _, d := range tasks[i].Deps {
-			prio[d-1] = prio[i]
+			prio[d] = max(prio[d], prio[i])
 		}
 	}
 	return prio

@@ -153,6 +153,16 @@ func TokensToString(tokens []an.Token) string {
 	return strings.Join(parts, " ")
 }
 
+func PrintGraph(tasks []df.Task) {
+	fmt.Println("\nГраф задачі:")
+	if len(tasks) == 0 {
+		fmt.Println("  вираз не містить операцій")
+	}
+	for _, t := range tasks {
+		fmt.Println(" ", t)
+	}
+}
+
 func PrintBanks(bankOf map[string]int, banks int) {
 	vars := make([][]string, banks)
 	for v, b := range bankOf {
@@ -177,12 +187,12 @@ func PrintGantt(res df.Result, processors, banks int) {
 		cell = max(cell, len(s.Label)+2)
 	}
 
-	var units []string
+	var units []df.Unit
 	for p := range processors {
-		units = append(units, fmt.Sprintf("P%d", p+1))
+		units = append(units, df.Unit{Kind: df.Proc, N: p})
 	}
 	for b := range banks {
-		units = append(units, fmt.Sprintf("B%d", b+1))
+		units = append(units, df.Unit{Kind: df.Bank, N: b})
 	}
 
 	fmt.Print("    ")
@@ -201,7 +211,7 @@ func PrintGantt(res df.Result, processors, banks int) {
 		slices.SortFunc(slots, func(a, b df.Slot) int { return a.Start - b.Start })
 
 		color := colorCyan
-		if u[0] == 'B' {
+		if u.Kind == df.Bank {
 			color = colorGreen
 		}
 

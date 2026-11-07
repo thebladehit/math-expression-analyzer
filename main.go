@@ -81,13 +81,7 @@ func main() {
 	PrintTree("Дерево паралельної форми", tree)
 
 	tasks := df.BuildGraph(tree)
-	fmt.Println("\nГраф задачі:")
-	if len(tasks) == 0 {
-		fmt.Println("  вираз не містить операцій")
-	}
-	for _, t := range tasks {
-		fmt.Println(" ", t)
-	}
+	PrintGraph(tasks)
 
 	bankOf := df.Distribute(tasks, cfg.Banks)
 	PrintBanks(bankOf, cfg.Banks)
